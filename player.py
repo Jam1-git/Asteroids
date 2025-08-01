@@ -2,12 +2,14 @@ import pygame
 from constants import *
 from circleshape import *
 from shot import Shot
+from powerup import *
 
 class Player(CircleShape):
-    def __init__(self, x, y):
+    def __init__(self, x, y, active_powerups = None):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.timer = 0
+        self.active_powerups = active_powerups or {}
 
     # in the player class
     def triangle(self):
@@ -37,8 +39,20 @@ class Player(CircleShape):
             self.move(-dt)
         if keys[pygame.K_SPACE] and self.timer < 0 :
             self.shoot()
-            self.timer = PLAYER_SHOOT_COOLDOWN
-        self.timer -= dt    
+            if Powerup.RAPID_FIRE[0] in self.active_powerups:
+                self.timer = POWER_SHOOT_COOLDOWN
+            else:
+                self.timer = PLAYER_SHOOT_COOLDOWN
+        self.timer -= dt  
+
+        expired_powerups = []
+        for powerup in self.active_powerups:
+            self.active_powerups[powerup] -= dt
+            if self.active_powerups[powerup] <= 0:
+                expired_powerups.append(powerup)
+            
+        for powerup in expired_powerups:
+            del self.active_powerups[powerup]
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -47,6 +61,13 @@ class Player(CircleShape):
     def shoot(self):
         new_shot = Shot(self.position[0], self.position[1])
         new_shot.velocity = pygame.Vector2(0,1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+    
+    def apply_powerup(self, power_type, duration = None):
+        if duration:
+            self.active_powerups[power_type] = duration
+        else:
+            self.active_powerups[power_type] = True
+
 
 
 
