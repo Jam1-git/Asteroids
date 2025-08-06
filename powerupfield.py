@@ -43,7 +43,7 @@ class PowerupField(pygame.sprite.Sprite):
 
             # spawn a new powerup at a random edge
             edge = random.choice(self.edges)
-            speed = random.randint(40, 100)
+            speed = 50
             velocity = edge[0] * speed
             velocity = velocity.rotate(random.randint(-30, 30))
             position = edge[1](random.uniform(0, 1))

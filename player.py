@@ -3,6 +3,7 @@ from constants import *
 from circleshape import *
 from shot import Shot
 from powerup import *
+from shield import Shield
 
 class Player(CircleShape):
     def __init__(self, x, y, active_powerups = None):
@@ -10,6 +11,8 @@ class Player(CircleShape):
         self.rotation = 0
         self.timer = 0
         self.active_powerups = active_powerups or {}
+        self.shield = None
+        
 
     # in the player class
     def triangle(self):
@@ -47,12 +50,16 @@ class Player(CircleShape):
 
         expired_powerups = []
         for powerup in self.active_powerups:
-            self.active_powerups[powerup] -= dt
-            if self.active_powerups[powerup] <= 0:
-                expired_powerups.append(powerup)
+            if self.active_powerups[powerup] != True:
+                self.active_powerups[powerup] -= dt
+                if self.active_powerups[powerup] <= 0:
+                    expired_powerups.append(powerup)
             
         for powerup in expired_powerups:
             del self.active_powerups[powerup]
+
+        
+        
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -63,11 +70,19 @@ class Player(CircleShape):
         new_shot.velocity = pygame.Vector2(0,1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
     
     def apply_powerup(self, power_type, duration = None):
+        if power_type == Powerup.SHIELD[0]:
+            if self.shield is None:
+                self.shield = Shield(self)         
         if duration:
             self.active_powerups[power_type] = duration
         else:
             self.active_powerups[power_type] = True
+    
+   
+             
 
+        
+    
 
 
 

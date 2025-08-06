@@ -6,12 +6,14 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from powerup import Powerup
 from powerupfield import PowerupField
+from shield import Shield
 import sys
 from shot import Shot
 import time
 
 def main():
-    pygame.init() 
+    pygame.init()
+    pygame.display.set_caption("Asteroids") 
     font = pygame.font.Font(None, 36)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock() 
@@ -32,6 +34,7 @@ def main():
     Shot.containers = (shots, updatable, drawable)
     Powerup.containers = (powerups, updatable, drawable)
     PowerupField.containers = (updatable)
+    Shield.containers = (updatable, drawable)
    
     my_player = Player(x = SCREEN_WIDTH / 2, y = SCREEN_HEIGHT / 2)
     new_asteroid_field = AsteroidField()
@@ -65,10 +68,26 @@ def main():
                     score += 10
                     for new_asteroid in new_asteroids:
                         asteroids.add(new_asteroid)
+                if my_player.shield and asteroid.collision_check(my_player.shield):
+                    asteroid.kill()
+                    my_player.shield.kill()
+                    my_player.shield = None
+                   
+                    del my_player.active_powerups[Powerup.SHIELD[0]]
+                    score += 10
+
         for powerup in list(powerups):
             if powerup.collision_check(my_player):
+
                 powerup.kill()
                 my_player.apply_powerup(powerup.power, powerup.duration)
+                print("Active powerups:", my_player.active_powerups)
+                
+                
+       
+        
+
+
         current_time = time.time()
         time_bonus = int((current_time - start_time) * 2)
         total_score = score + time_bonus
